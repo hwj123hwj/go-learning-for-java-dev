@@ -21,6 +21,8 @@
         .btn-danger:hover { background: #c82333; }
         .btn-warning { background: #ffc107; color: #333; }
         .btn-warning:hover { background: #e0a800; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: #f8f9fa; color: #333; }
@@ -29,56 +31,206 @@
         .toast { position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 4px; color: white; z-index: 1000; }
         .toast.success { background: #28a745; }
         .toast.error { background: #dc3545; }
+        .hidden { display: none; }
+        .user-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px; background: #e7f3ff; border-radius: 4px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; border: none; background: #e9ecef; border-radius: 4px; cursor: pointer; }
+        .tab.active { background: #007bff; color: white; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>用户管理系统</h1>
         
-        <div class="card">
-            <h2 id="form-title">添加用户</h2>
-            <form id="user-form">
-                <input type="hidden" id="user-id">
-                <div class="form-group">
-                    <label>姓名</label>
-                    <input type="text" id="name" placeholder="请输入姓名" required>
-                </div>
-                <div class="form-group">
-                    <label>邮箱</label>
-                    <input type="email" id="email" placeholder="请输入邮箱" required>
-                </div>
-                <div class="form-group">
-                    <label>年龄</label>
-                    <input type="number" id="age" placeholder="请输入年龄" required>
-                </div>
-                <button type="submit" class="btn btn-primary">保存</button>
-                <button type="button" class="btn" id="cancel-btn" style="display:none;">取消</button>
-            </form>
+        <div id="auth-section">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('login')">登录</button>
+                <button class="tab" onclick="showTab('register')">注册</button>
+            </div>
+            
+            <div id="login-form" class="card">
+                <h2>登录</h2>
+                <form onsubmit="login(event)">
+                    <div class="form-group">
+                        <label>邮箱</label>
+                        <input type="email" id="login-email" placeholder="请输入邮箱" required>
+                    </div>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <input type="password" id="login-password" placeholder="请输入密码" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">登录</button>
+                </form>
+            </div>
+            
+            <div id="register-form" class="card hidden">
+                <h2>注册</h2>
+                <form onsubmit="register(event)">
+                    <div class="form-group">
+                        <label>姓名</label>
+                        <input type="text" id="reg-name" placeholder="请输入姓名" required>
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱</label>
+                        <input type="email" id="reg-email" placeholder="请输入邮箱" required>
+                    </div>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <input type="password" id="reg-password" placeholder="请输入密码（至少6位）" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label>年龄</label>
+                        <input type="number" id="reg-age" placeholder="请输入年龄" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">注册</button>
+                </form>
+            </div>
         </div>
+        
+        <div id="main-section" class="hidden">
+            <div class="user-info">
+                <span>欢迎，<strong id="username"></strong></span>
+                <button class="btn btn-danger" onclick="logout()">退出</button>
+            </div>
+            
+            <div class="card">
+                <h2 id="form-title">添加用户</h2>
+                <form id="user-form">
+                    <input type="hidden" id="user-id">
+                    <div class="form-group">
+                        <label>姓名</label>
+                        <input type="text" id="name" placeholder="请输入姓名" required>
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱</label>
+                        <input type="email" id="email" placeholder="请输入邮箱" required>
+                    </div>
+                    <div class="form-group">
+                        <label>年龄</label>
+                        <input type="number" id="age" placeholder="请输入年龄" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                    <button type="button" class="btn" id="cancel-btn" style="display:none;">取消</button>
+                </form>
+            </div>
 
-        <div class="card">
-            <h2>用户列表</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>姓名</th>
-                        <th>邮箱</th>
-                        <th>年龄</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody id="user-list"></tbody>
-            </table>
+            <div class="card">
+                <h2>用户列表</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>姓名</th>
+                            <th>邮箱</th>
+                            <th>年龄</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-list"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script>
-        const API_URL = 'http://localhost:8080/api/users';
-        
-        document.addEventListener('DOMContentLoaded', loadUsers);
+        const API_URL = 'http://localhost:8080/api';
+        let token = localStorage.getItem('token');
+        let currentUser = JSON.parse(localStorage.getItem('user') || 'null');
 
-        document.getElementById('user-form').addEventListener('submit', async (e) => {
+        document.addEventListener('DOMContentLoaded', function() {
+            if (token && currentUser) {
+                showMainSection();
+            }
+        });
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(function(t) {
+                t.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            if (tabName === 'login') {
+                document.getElementById('login-form').classList.remove('hidden');
+                document.getElementById('register-form').classList.add('hidden');
+            } else {
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('register-form').classList.remove('hidden');
+            }
+        }
+
+        async function login(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                const res = await fetch(API_URL + '/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, password: password })
+                });
+                const data = await res.json();
+                
+                if (data.code === 0) {
+                    token = data.data.token;
+                    currentUser = data.data.user;
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    showToast('登录成功', 'success');
+                    showMainSection();
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (err) {
+                showToast('登录失败', 'error');
+            }
+        }
+
+        async function register(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const age = parseInt(document.getElementById('reg-age').value);
+            
+            try {
+                const res = await fetch(API_URL + '/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name, email: email, password: password, age: age })
+                });
+                const data = await res.json();
+                
+                if (data.code === 0) {
+                    showToast('注册成功，请登录', 'success');
+                    showTab('login');
+                    document.getElementById('login-email').value = email;
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (err) {
+                showToast('注册失败', 'error');
+            }
+        }
+
+        function logout() {
+            token = null;
+            currentUser = null;
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('main-section').classList.add('hidden');
+            showToast('已退出登录', 'success');
+        }
+
+        function showMainSection() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('main-section').classList.remove('hidden');
+            document.getElementById('username').textContent = currentUser.name;
+            loadUsers();
+        }
+
+        document.getElementById('user-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const id = document.getElementById('user-id').value;
             const user = {
@@ -89,16 +241,22 @@
 
             try {
                 if (id) {
-                    await fetch(`${API_URL}/${id}`, {
+                    await fetch(API_URL + '/users/' + id, {
                         method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
                         body: JSON.stringify(user)
                     });
                     showToast('更新成功', 'success');
                 } else {
-                    await fetch(API_URL, {
+                    await fetch(API_URL + '/users', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
                         body: JSON.stringify(user)
                     });
                     showToast('创建成功', 'success');
@@ -114,8 +272,17 @@
 
         async function loadUsers() {
             try {
-                const res = await fetch(API_URL);
-                const users = await res.json();
+                const res = await fetch(API_URL + '/users', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                
+                if (data.code !== 0) {
+                    showToast(data.message, 'error');
+                    return;
+                }
+                
+                const users = data.data;
                 const tbody = document.getElementById('user-list');
                 
                 if (users.length === 0) {
@@ -123,18 +290,18 @@
                     return;
                 }
 
-                tbody.innerHTML = users.map(u => `
-                    <tr>
-                        <td>${u.id}</td>
-                        <td>${u.name}</td>
-                        <td>${u.email}</td>
-                        <td>${u.age}</td>
-                        <td class="actions">
-                            <button class="btn btn-warning" onclick="editUser(${u.id}, '${u.name}', '${u.email}', ${u.age})">编辑</button>
-                            <button class="btn btn-danger" onclick="deleteUser(${u.id})">删除</button>
-                        </td>
-                    </tr>
-                `).join('');
+                tbody.innerHTML = users.map(function(u) {
+                    return '<tr>' +
+                        '<td>' + u.id + '</td>' +
+                        '<td>' + u.name + '</td>' +
+                        '<td>' + u.email + '</td>' +
+                        '<td>' + u.age + '</td>' +
+                        '<td class="actions">' +
+                            '<button class="btn btn-warning" onclick="editUser(' + u.id + ', \'' + u.name + '\', \'' + u.email + '\', ' + u.age + ')">编辑</button>' +
+                            '<button class="btn btn-danger" onclick="deleteUser(' + u.id + ')">删除</button>' +
+                        '</td>' +
+                    '</tr>';
+                }).join('');
             } catch (err) {
                 showToast('加载失败', 'error');
             }
@@ -152,7 +319,10 @@
         async function deleteUser(id) {
             if (!confirm('确定删除该用户？')) return;
             try {
-                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                await fetch(API_URL + '/users/' + id, { 
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
                 showToast('删除成功', 'success');
                 loadUsers();
             } catch (err) {
@@ -169,10 +339,10 @@
 
         function showToast(msg, type) {
             const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
+            toast.className = 'toast ' + type;
             toast.textContent = msg;
             document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2000);
+            setTimeout(function() { toast.remove(); }, 2000);
         }
     </script>
 </body>
