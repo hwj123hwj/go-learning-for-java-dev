@@ -1,0 +1,13 @@
+server:
+  port: "8080"
+
+database:
+  host: "localhost"
+  port: "5433"
+  user: "root"
+  password: "15671040800q"
+  name: "go_user_api"
+
+jwt:
+  secret: "your-secret-key-change-in-production"
+  expire: "24h"

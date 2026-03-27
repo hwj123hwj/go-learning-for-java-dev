@@ -17,31 +17,30 @@
   - [x] 前端测试界面
   - [x] 项目文档
 
-## 阶段三：进阶功能（待实现）
-- [ ] Task 3: 参数校验
-  - [ ] 集成validator库
-  - [ ] 定义校验规则
-  - [ ] 统一错误响应
-  - [ ] 对比Spring Validation文档
+## 阶段三：进阶功能（已完成）
+- [x] Task 3: 参数校验
+  - [x] 集成validator库
+  - [x] 定义校验规则
+  - [x] 统一错误响应
+  - [x] 对比Spring Validation文档
 
-- [ ] Task 4: JWT认证
-  - [ ] 用户登录接口
-  - [ ] JWT Token生成与验证
-  - [ ] 认证中间件
-  - [ ] 密码加密（bcrypt）
-  - [ ] 对比Spring Security文档
+- [x] Task 4: JWT认证
+  - [x] 用户登录接口
+  - [x] JWT Token生成与验证
+  - [x] 认证中间件
+  - [x] 密码加密（bcrypt）
+  - [x] 对比Spring Security文档
 
-- [ ] Task 5: 日志中间件
-  - [ ] 请求日志记录
-  - [ ] 日志格式化
-  - [ ] 日志文件输出
-  - [ ] 对比Java日志切面
+- [x] Task 5: 日志中间件
+  - [x] 请求日志记录
+  - [x] 日志格式化
+  - [x] 对比Java日志切面
 
-- [ ] Task 6: 配置管理
-  - [ ] 创建config.yaml
-  - [ ] 集成viper读取配置
-  - [ ] 环境变量支持
-  - [ ] 对比Spring配置
+- [x] Task 6: 配置管理
+  - [x] 创建config.yaml
+  - [x] 集成viper读取配置
+  - [x] 环境变量支持
+  - [x] 对比Spring配置
 
 - [ ] Task 7: 单元测试
   - [ ] Service层测试
