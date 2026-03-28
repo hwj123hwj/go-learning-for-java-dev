@@ -10,10 +10,10 @@ import (
 )
 
 type AuthController struct {
-	userService *service.UserService
+	userService service.UserService // 依赖接口
 }
 
-func NewAuthController(userService *service.UserService) *AuthController {
+func NewAuthController(userService service.UserService) *AuthController {
 	return &AuthController{userService: userService}
 }
 
@@ -42,7 +42,7 @@ func (c *AuthController) Register(ctx *gin.Context) {
 		return
 	}
 
-	utils.Success(ctx, gin.H{"message": "注册成功"})
+	utils.Created(ctx, gin.H{"message": "注册成功"})
 }
 
 func (c *AuthController) Login(ctx *gin.Context) {

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"strconv"
 	"user-api-advanced/dto"
 	"user-api-advanced/model"
@@ -8,14 +9,15 @@ import (
 	"user-api-advanced/utils"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type UserController struct {
-	service *service.UserService
+	service service.UserService // 依赖接口
 }
 
-func NewUserController(service *service.UserService) *UserController {
-	return &UserController{service: service}
+func NewUserController(svc service.UserService) *UserController {
+	return &UserController{service: svc}
 }
 
 func (c *UserController) GetAll(ctx *gin.Context) {
@@ -38,7 +40,7 @@ func (c *UserController) GetByID(ctx *gin.Context) {
 		utils.NotFound(ctx, "用户不存在")
 		return
 	}
-	utils.Success(ctx, user)
+	utils.Created(ctx, user)
 }
 
 func (c *UserController) Create(ctx *gin.Context) {
@@ -58,7 +60,7 @@ func (c *UserController) Create(ctx *gin.Context) {
 		utils.BadRequest(ctx, err.Error())
 		return
 	}
-	utils.Success(ctx, user)
+	utils.Created(ctx, user)
 }
 
 func (c *UserController) Update(ctx *gin.Context) {
@@ -81,7 +83,11 @@ func (c *UserController) Update(ctx *gin.Context) {
 	}
 
 	if err := c.service.UpdateUser(uint(id), user); err != nil {
-		utils.BadRequest(ctx, err.Error())
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			utils.NotFound(ctx, "用户不存在")
+			return
+		}
+		utils.InternalError(ctx, err.Error())
 		return
 	}
 	utils.Success(ctx, gin.H{"message": "更新成功"})
@@ -95,7 +101,11 @@ func (c *UserController) Delete(ctx *gin.Context) {
 	}
 
 	if err := c.service.DeleteUser(uint(id)); err != nil {
-		utils.BadRequest(ctx, err.Error())
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			utils.NotFound(ctx, "用户不存在")
+			return
+		}
+		utils.InternalError(ctx, err.Error())
 		return
 	}
 	utils.Success(ctx, gin.H{"message": "删除成功"})

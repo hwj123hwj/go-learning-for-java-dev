@@ -1,6 +1,7 @@
 package router
 
 import (
+	"net/http"
 	"user-api/controller"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ func SetupRouter(userController *controller.UserController) *gin.Engine {
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Content-Type")
 		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
+			c.AbortWithStatus(http.StatusNoContent)
 			return
 		}
 		c.Next()
@@ -22,7 +23,7 @@ func SetupRouter(userController *controller.UserController) *gin.Engine {
 
 	r.Static("/static", "./static")
 	r.GET("/", func(c *gin.Context) {
-		c.Redirect(302, "/static/index.html")
+		c.Redirect(http.StatusFound, "/static/index.html")
 	})
 
 	api := r.Group("/api")

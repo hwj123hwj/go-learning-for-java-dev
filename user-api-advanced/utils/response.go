@@ -20,6 +20,15 @@ func Success(c *gin.Context, data interface{}) {
 	})
 }
 
+// Created 用于资源创建成功，返回 201 Created
+func Created(c *gin.Context, data interface{}) {
+	c.JSON(http.StatusCreated, Response{
+		Code:    0,
+		Message: "created",
+		Data:    data,
+	})
+}
+
 func Error(c *gin.Context, code int, message string) {
 	c.JSON(code, Response{
 		Code:    -1,

@@ -1,20 +1,22 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"user-api/model"
 	"user-api/service"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type UserController struct {
-	service *service.UserService
+	service service.UserService // 依赖接口，而非具体结构体
 }
 
-func NewUserController(service *service.UserService) *UserController {
-	return &UserController{service: service}
+func NewUserController(svc service.UserService) *UserController {
+	return &UserController{service: svc}
 }
 
 func (c *UserController) GetAll(ctx *gin.Context) {
@@ -65,7 +67,11 @@ func (c *UserController) Update(ctx *gin.Context) {
 		return
 	}
 	if err := c.service.UpdateUser(uint(id), &user); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "user updated"})
@@ -78,7 +84,11 @@ func (c *UserController) Delete(ctx *gin.Context) {
 		return
 	}
 	if err := c.service.DeleteUser(uint(id)); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "user deleted"})

@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
 )
 
 type MockUserRepository struct {
@@ -71,9 +72,10 @@ func TestUserService_CreateUser_Success(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	userService := NewUserService(mockRepo)
 
-	user := &model.User{Name: "Alice", Email: "alice@test.com", Age: 25}
+	user := &model.User{Name: "Alice", Email: "alice@test.com"}
 
-	mockRepo.On("FindByEmail", "alice@test.com").Return(&model.User{}, nil)
+	// 邮箱未占用 → FindByEmail 返回 ErrRecordNotFound
+	mockRepo.On("FindByEmail", "alice@test.com").Return(nil, gorm.ErrRecordNotFound)
 	mockRepo.On("Create", user).Return(nil)
 
 	err := userService.CreateUser(user)
@@ -86,9 +88,10 @@ func TestUserService_CreateUser_EmailExists(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	userService := NewUserService(mockRepo)
 
-	user := &model.User{Name: "Alice", Email: "alice@test.com", Age: 25}
+	user := &model.User{Name: "Alice", Email: "alice@test.com"}
 	existingUser := &model.User{ID: 1, Name: "Alice", Email: "alice@test.com"}
 
+	// 邮箱已占用 → FindByEmail 返回 nil error（找到了记录）
 	mockRepo.On("FindByEmail", "alice@test.com").Return(existingUser, nil)
 
 	err := userService.CreateUser(user)

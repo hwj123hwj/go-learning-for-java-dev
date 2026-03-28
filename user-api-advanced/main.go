@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"user-api-advanced/config"
 	"user-api-advanced/controller"
@@ -9,9 +8,6 @@ import (
 	"user-api-advanced/repository"
 	"user-api-advanced/router"
 	"user-api-advanced/service"
-
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 func main() {
@@ -21,25 +17,17 @@ func main() {
 	}
 	log.Println("Config loaded successfully")
 
-	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		cfg.Database.Host, cfg.Database.Port, cfg.Database.User, cfg.Database.Password, cfg.Database.Name,
-	)
-
-	config.DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+	if err := config.InitDB(cfg); err != nil {
+		log.Fatalf("Failed to init database: %v", err)
 	}
-
 	log.Println("Database connected successfully")
 
-	err = config.DB.AutoMigrate(&model.User{})
-	if err != nil {
+	if err := config.DB.AutoMigrate(&model.User{}); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
 	log.Println("Database migrated successfully")
 
-	userRepo := repository.NewUserRepository()
+	userRepo := repository.NewUserRepository(config.DB)
 	userService := service.NewUserService(userRepo)
 	userController := controller.NewUserController(userService)
 	authController := controller.NewAuthController(userService)

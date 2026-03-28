@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+
 	"github.com/spf13/viper"
 )
 
@@ -34,17 +36,42 @@ func LoadConfig() (*Config, error) {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
 	viper.AddConfigPath("./config")
+
+	// 环境变量优先级高于配置文件
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, err
 	}
 
-	var config Config
-	if err := viper.Unmarshal(&config); err != nil {
+	var cfg Config
+	if err := viper.Unmarshal(&cfg); err != nil {
 		return nil, err
 	}
 
-	AppConfig = &config
-	return &config, nil
+	// 敏感字段从环境变量覆盖，确保不依赖配置文件中的明文值
+	if v := os.Getenv("DB_PASSWORD"); v != "" {
+		cfg.Database.Password = v
+	}
+	if v := os.Getenv("DB_USER"); v != "" {
+		cfg.Database.User = v
+	}
+	if v := os.Getenv("DB_HOST"); v != "" {
+		cfg.Database.Host = v
+	}
+	if v := os.Getenv("DB_PORT"); v != "" {
+		cfg.Database.Port = v
+	}
+	if v := os.Getenv("DB_NAME"); v != "" {
+		cfg.Database.Name = v
+	}
+	if v := os.Getenv("JWT_SECRET"); v != "" {
+		cfg.JWT.Secret = v
+	}
+	if v := os.Getenv("SERVER_PORT"); v != "" {
+		cfg.Server.Port = v
+	}
+
+	AppConfig = &cfg
+	return &cfg, nil
 }

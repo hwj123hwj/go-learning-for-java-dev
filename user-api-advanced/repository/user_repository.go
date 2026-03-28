@@ -1,12 +1,12 @@
 package repository
 
 import (
-	"user-api-advanced/config"
 	"user-api-advanced/model"
 
 	"gorm.io/gorm"
 )
 
+// UserRepository 定义数据访问层接口
 type UserRepository interface {
 	FindAll() ([]model.User, error)
 	FindByID(id uint) (*model.User, error)
@@ -20,8 +20,9 @@ type userRepository struct {
 	db *gorm.DB
 }
 
-func NewUserRepository() UserRepository {
-	return &userRepository{db: config.DB}
+// NewUserRepository 通过依赖注入接收 *gorm.DB，不依赖全局变量
+func NewUserRepository(db *gorm.DB) UserRepository {
+	return &userRepository{db: db}
 }
 
 func (r *userRepository) FindAll() ([]model.User, error) {
@@ -36,6 +37,12 @@ func (r *userRepository) FindByID(id uint) (*model.User, error) {
 	return &user, err
 }
 
+func (r *userRepository) FindByEmail(email string) (*model.User, error) {
+	var user model.User
+	err := r.db.Where("email = ?", email).First(&user).Error
+	return &user, err
+}
+
 func (r *userRepository) Create(user *model.User) error {
 	return r.db.Create(user).Error
 }
@@ -46,10 +53,4 @@ func (r *userRepository) Update(user *model.User) error {
 
 func (r *userRepository) Delete(id uint) error {
 	return r.db.Delete(&model.User{}, id).Error
-}
-
-func (r *userRepository) FindByEmail(email string) (*model.User, error) {
-	var user model.User
-	err := r.db.Where("email = ?", email).First(&user).Error
-	return &user, err
 }

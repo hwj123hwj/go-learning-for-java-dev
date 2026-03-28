@@ -19,13 +19,11 @@ func LoggerMiddleware() gin.HandlerFunc {
 		path := c.Request.URL.Path
 		clientIP := c.ClientIP()
 
-		log.Printf("[%s] %s %s %d %v %s",
-			method,
-			path,
-			clientIP,
-			statusCode,
-			latency,
-			c.Errors.String(),
-		)
+		// 只在有错误时才附加错误信息
+		if errMsg := c.Errors.String(); errMsg != "" {
+			log.Printf("[%s] %s %s %d %v | %s", method, path, clientIP, statusCode, latency, errMsg)
+		} else {
+			log.Printf("[%s] %s %s %d %v", method, path, clientIP, statusCode, latency)
+		}
 	}
 }
