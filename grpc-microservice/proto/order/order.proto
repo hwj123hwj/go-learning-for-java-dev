@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package order;
+
+option go_package = "grpc-microservice/proto/order";
+
+// Order 表示订单消息。
+//
+// 注意: user_name 是运行时从 UserService 查询后填充的展示字段，非持久化字段。
+// 理想设计是拆分为 Order（数据模型）和 OrderView（响应DTO），但会需要重新生成代码。
+// 本示例保持当前结构，通过注释说明字段来源，避免在其他字段中混入类似冗余字段。
+//
+// 对比Java: 类似在 @Entity 上加了 @Transient 字段，或者直接用 VO/DTO 替代 Entity 作为响应体
+message Order {
+  int32 id = 1;
+  int32 user_id = 2;
+  string product = 3;
+  int32 quantity = 4;
+  string user_name = 5;  // 展示字段: 从UserService实时查询填充，不持久化
+}
+
+message CreateOrderRequest {
+  int32 user_id = 1;
+  string product = 2;
+  int32 quantity = 3;
+}
+
+message CreateOrderResponse {
+  Order order = 1;
+}
+
+message GetOrderRequest {
+  int32 id = 1;
+}
+
+message GetOrderResponse {
+  Order order = 1;
+}
+
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+  rpc GetOrder(GetOrderRequest) returns (GetOrderResponse);
+}

@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package demo;
+
+option go_package = "grpc-demo/gen/go/demo";
+
+// 用户消息
+message User {
+  int32 id = 1;
+  string name = 2;
+  string email = 3;
+}
+
+// ========== Unary RPC ==========
+
+message GetUserRequest {
+  int32 id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+// ========== Server Streaming ==========
+
+message ListUsersRequest {
+  int32 page_size = 1;
+}
+
+message ListUsersResponse {
+  User user = 1;
+  int32 page = 2;
+}
+
+// ========== Client Streaming ==========
+
+message UploadUsersRequest {
+  User user = 1;
+}
+
+message UploadUsersResponse {
+  int32 count = 1;
+  string message = 2;
+}
+
+// ========== Bidirectional Streaming ==========
+
+message ChatMessage {
+  string from = 1;
+  string content = 2;
+  int64 timestamp = 3;
+}
+
+// ========== Demo服务 ==========
+
+service DemoService {
+  // Unary: 普通请求-响应
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  
+  // Server Streaming: 服务端流式返回
+  rpc ListUsers(ListUsersRequest) returns (stream ListUsersResponse);
+  
+  // Client Streaming: 客户端流式上传
+  rpc UploadUsers(stream UploadUsersRequest) returns (UploadUsersResponse);
+  
+  // Bidirectional Streaming: 双向流式通信
+  rpc Chat(stream ChatMessage) returns (stream ChatMessage);
+}
