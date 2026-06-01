@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"time"
 	"user-api/model"
 
 	"gorm.io/driver/postgres"
@@ -21,6 +22,14 @@ func InitDB(cfg *Config) error {
 	if err != nil {
 		return fmt.Errorf("failed to connect database: %w", err)
 	}
+
+	sqlDB, err := DB.DB()
+	if err != nil {
+		return fmt.Errorf("failed to get sql.DB: %w", err)
+	}
+	sqlDB.SetMaxOpenConns(25)
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetConnMaxLifetime(5 * time.Minute)
 
 	err = DB.AutoMigrate(&model.User{})
 	if err != nil {

@@ -68,6 +68,9 @@ func LoadConfig() (*Config, error) {
 	if v := os.Getenv("JWT_SECRET"); v != "" {
 		cfg.JWT.Secret = v
 	}
+	if v := os.Getenv("JWT_EXPIRE"); v != "" {
+		cfg.JWT.Expire = v
+	}
 	if v := os.Getenv("SERVER_PORT"); v != "" {
 		cfg.Server.Port = v
 	}

@@ -52,11 +52,17 @@ func (s *userService) UpdateUser(id uint, user *model.User) error {
 	if err != nil {
 		return err
 	}
-	// 只更新非零值字段，避免客户端漏传字段时把数据清空
 	if user.Name != "" {
 		existing.Name = user.Name
 	}
-	if user.Email != "" {
+	if user.Email != "" && user.Email != existing.Email {
+		_, err := s.repo.FindByEmail(user.Email)
+		if err == nil {
+			return errors.New("email already exists")
+		}
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
 		existing.Email = user.Email
 	}
 	if user.Age != nil {

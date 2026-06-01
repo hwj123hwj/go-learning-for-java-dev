@@ -22,7 +22,7 @@ func NewUserController(svc service.UserService) *UserController {
 func (c *UserController) GetAll(ctx *gin.Context) {
 	users, err := c.service.GetAllUsers()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get users"})
 		return
 	}
 	ctx.JSON(http.StatusOK, users)
@@ -36,7 +36,11 @@ func (c *UserController) GetByID(ctx *gin.Context) {
 	}
 	user, err := c.service.GetUserByID(uint(id))
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+		}
 		return
 	}
 	ctx.JSON(http.StatusOK, user)
@@ -71,7 +75,7 @@ func (c *UserController) Update(ctx *gin.Context) {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "user updated"})
@@ -88,7 +92,7 @@ func (c *UserController) Delete(ctx *gin.Context) {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "user deleted"})

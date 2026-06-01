@@ -40,7 +40,7 @@ func (c *UserController) GetByID(ctx *gin.Context) {
 		utils.NotFound(ctx, "用户不存在")
 		return
 	}
-	utils.Created(ctx, user)
+	utils.Success(ctx, user)
 }
 
 func (c *UserController) Create(ctx *gin.Context) {
@@ -50,10 +50,17 @@ func (c *UserController) Create(ctx *gin.Context) {
 		return
 	}
 
+	hashedPassword, err := utils.HashPassword(req.Password)
+	if err != nil {
+		utils.InternalError(ctx, "密码加密失败")
+		return
+	}
+
 	user := &model.User{
-		Name:  req.Name,
-		Email: req.Email,
-		Age:   req.Age,
+		Name:     req.Name,
+		Email:    req.Email,
+		Password: hashedPassword,
+		Age:      req.Age,
 	}
 
 	if err := c.service.CreateUser(user); err != nil {

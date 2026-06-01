@@ -17,7 +17,7 @@ func jwtSecret() []byte {
 	if config.AppConfig != nil && config.AppConfig.JWT.Secret != "" {
 		return []byte(config.AppConfig.JWT.Secret)
 	}
-	return []byte("change-me-in-production")
+	panic("JWT_SECRET 未配置，请设置环境变量 JWT_SECRET 或在 config.yaml 中配置 jwt.secret")
 }
 
 // jwtExpire 从配置读取过期时长，解析失败时降级为 24h

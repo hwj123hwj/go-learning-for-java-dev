@@ -60,10 +60,16 @@ func (s *userService) UpdateUser(id uint, user *model.User) error {
 	if user.Name != "" {
 		existing.Name = user.Name
 	}
-	if user.Email != "" {
+	if user.Email != "" && user.Email != existing.Email {
+		_, err := s.repo.FindByEmail(user.Email)
+		if err == nil {
+			return errors.New("邮箱已存在")
+		}
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
 		existing.Email = user.Email
 	}
-	// Age 使用指针，nil 表示"不更新"，非 nil 则覆盖（包括更新为 0 的情况）
 	if user.Age != nil {
 		existing.Age = user.Age
 	}
