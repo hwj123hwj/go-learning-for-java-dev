@@ -7,6 +7,7 @@
 - 一级目录 = 学习阶段，序号即顺序（`01-quickstart` … `09-streaming-proxy`）；`interview-prep/` 是面试准备支线，与主线解耦。
 - 每个一级目录是独立 Go module（`01-quickstart` 除外，无 go.mod，单文件 `go run xx.go` 运行）。
 - 部分旧目录的 module 名与目录名不一致（如 `06-concurrency` 的 module 名仍是 `concurrency-demo`），历史原因，能正常构建，勿"顺手统一"，改动它会连带全量 import 更新。
+- `JOURNEY.md` 是按日期追加的成长轨迹（技术决策、观点、复盘）；只追加不改写，复盘以新小节补在原条目下。
 
 ## 代码风格（新代码必须遵守）
 
