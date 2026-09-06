@@ -245,3 +245,28 @@ go test ./... -v
 | 接口 | 显式implements | 隐式实现（duck typing） |
 | 并发 | 线程 + ExecutorService | goroutine + channel |
 | 测试 | JUnit + Mockito | testing + testify |
+
+---
+
+## Docker 部署（多阶段构建）
+
+> 这是当初学习路线图"阶段四"的遗留项，现在补齐。核心知识点：**多阶段构建**——Go 编译出静态二进制，最终镜像不需要 Go 环境，体积从 ~800MB（golang 镜像）降到 ~15MB（alpine）。
+
+```bash
+# 准备环境变量（compose 会自动读取同目录 .env）
+cp .env.example .env && vim .env   # 填 DB_PASSWORD 和 JWT_SECRET
+
+# 一条命令起全套：Postgres 16 + 应用
+docker compose up --build
+
+# 首次启动后自动建表（GORM AutoMigrate），浏览器打开
+# http://localhost:8080 即可访问前端测试页
+```
+
+看懂 Dockerfile 里的三个细节：
+
+1. **先拷 go.mod/go.sum 再 `go mod download`**：利用 docker layer 缓存，改代码不重新下依赖。
+2. **`CGO_ENABLED=0`**：纯静态编译，运行镜像连 libc 都不带。
+3. **非 root 用户运行**（`adduser appuser`）：容器安全的最低要求。
+
+compose 里的 `DB_HOST: db` 是容器网络知识点：应用容器里数据库的主机名是**服务名**，不是 localhost。
