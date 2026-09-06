@@ -1,0 +1,40 @@
+# 一条命令起整套：Postgres + 应用。
+# docker compose up --build
+#
+# 对比 Java：application.yml 里 localhost 改成 db 就是这里的环境变量注入；
+# 敏感值（密码/JWT secret）从 .env 读，.env 已被 .gitignore 保护。
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?请在 .env 里设置 DB_PASSWORD}
+      POSTGRES_DB: go_user_api
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy # 等数据库就绪再启动，避免启动即崩
+    environment:
+      DB_HOST: db          # 注意：容器网络里数据库的主机名是服务名 db，不是 localhost
+      DB_PORT: "5432"
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: go_user_api
+      JWT_SECRET: ${JWT_SECRET:?请在 .env 里设置 JWT_SECRET}
+      SERVER_PORT: "8080"
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
