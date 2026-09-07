@@ -5,7 +5,7 @@
 ## 快速开始
 
 ```bash
-cd quickstart
+cd 01-quickstart
 go run 01_hello.go
 ```
 

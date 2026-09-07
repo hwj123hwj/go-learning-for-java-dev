@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Java → Go · 交互学习实验室</title>
+  <meta name="description" content="面向 Java 开发者的 Go 交互学习实验室。九阶段课程、Channel 动态实验、SSE 与 fallback 逐步演示，连接真实源码与练习。">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.mjs"></script>
+</head>
+<body>
+<a class="skip" href="#lesson">跳到课程内容</a>
+<header class="header"><a class="brand" href="#course-06"><span class="brand-symbol">Go</span><span>Java → Go <small>交互学习实验室</small></span></a><nav aria-label="主导航"><a href="#labs">概念实验</a><a href="https://github.com/hwj123hwj/go-learning-for-java-dev">GitHub ↗</a></nav></header>
+<div class="workspace">
+  <aside class="curriculum" aria-label="课程路线">
+    <div class="sidebar-heading"><h2>学习路线</h2><span>从语法到实战</span></div>
+    <div id="course-list"></div>
+    <div class="progress-box"><label for="course-progress">我的学习进度 <strong id="progress-count">0 / 9</strong></label><progress id="course-progress" max="9" value="0"></progress><p id="storage-note">仅保存在此浏览器，完成状态由你自评。</p><button id="clear-progress" type="button" class="text-button">清空进度</button></div>
+    <a class="branch-link" href="https://github.com/hwj123hwj/go-learning-for-java-dev/tree/main/interview-prep">面试准备支线 ↗</a>
+  </aside>
+  <main id="lesson">
+    <section class="lesson-intro" aria-labelledby="lesson-title">
+      <div class="lesson-topline"><span id="lesson-stage">阶段 06 · 并发编程</span><span class="reading-tag">读源码之前，先观察</span></div>
+      <h1 id="lesson-title">看见并发，理解协作。</h1>
+      <p id="lesson-description" class="lead">调整 Channel 容量，试着发送与接收。观察数据何时移动、goroutine 为什么等待。</p>
+      <div class="lesson-actions"><a id="lesson-source" class="button primary" href="https://github.com/hwj123hwj/go-learning-for-java-dev/tree/main/06-concurrency">打开课程源码 ↗</a><a id="lesson-exercises" class="button" href="https://github.com/hwj123hwj/go-learning-for-java-dev/blob/main/06-concurrency/EXERCISES.md">进入练习 ↗</a><label class="completion"><input id="lesson-complete" type="checkbox">我已完成这一阶段</label></div>
+    </section>
+    <section class="lesson-notes" aria-label="本课学习要点"><div><h2>从 Java 经验出发</h2><p id="java-bridge"></p></div><div><h2>这一步练到什么程度</h2><p id="lesson-goal"></p></div></section>
+    <section id="labs" class="labs" aria-labelledby="labs-title">
+      <div class="section-title"><h2 id="labs-title">动手改变，观察结果</h2><span>浏览器教学模拟 · 不执行 Go</span></div>
+      <div class="lab-tabs" role="tablist" aria-label="概念实验">
+        <button id="tab-channel" role="tab" aria-selected="true" aria-controls="channel-panel" tabindex="0" data-lab="channel">Channel 的发送与接收</button>
+        <button id="tab-gateway" role="tab" aria-selected="false" aria-controls="gateway-panel" tabindex="-1" data-lab="gateway">SSE 与上游切换</button>
+      </div>
+      <div id="channel-panel" role="tabpanel" aria-labelledby="tab-channel">
+        <div class="lab-toolbar"><label>Channel 容量 <select id="capacity"><option value="0">0 · 无缓冲</option><option value="2" selected>2 · 有缓冲</option><option value="4">4 · 有缓冲</option></select></label><span id="channel-kind">缓冲区可容纳 2 个值</span><button id="channel-reset" class="text-button" type="button">重置实验</button></div>
+        <div class="channel-stage" aria-label="发送者、Channel 和接收者状态">
+          <div class="actor"><span class="actor-type">goroutine A</span><h3>发送者</h3><div id="sender-value" class="actor-value">准备发送 1</div><span id="sender-state" class="state">就绪</span><button id="send" type="button" class="button">发送一个值 →</button></div>
+          <div class="channel-middle"><span class="connection-arrow" aria-hidden="true">→</span><div class="buffer-label"><code>ch := make(chan int, 2)</code></div><div id="buffer" class="buffer" aria-label="Channel 缓冲区"></div><div id="buffer-count">0 / 2 已使用</div><span class="connection-arrow" aria-hidden="true">→</span></div>
+          <div class="actor"><span class="actor-type">goroutine B</span><h3>接收者</h3><div id="receiver-value" class="actor-value">尚未接收</div><span id="receiver-state" class="state">就绪</span><button id="receive" type="button" class="button">← 接收一个值</button></div>
+        </div>
+        <p id="channel-message" class="lab-message" role="status">先发送两次，再试着发送第三次。缓冲区满时会发生什么？</p>
+        <div class="lab-footer"><button id="channel-close" type="button" class="text-button">关闭 Channel</button><span id="close-note">由发送方关闭；关闭后可以继续读完缓冲值。</span></div>
+        <details class="explanation"><summary>为什么这和 Java 的队列不完全一样？</summary><p>有缓冲 Channel 可以类比有界 BlockingQueue，但容量为 0 时，发送与接收必须配对；它更接近一次交接。Channel 也有关闭语义：缓冲读完后返回零值与 ok=false。这个实验每侧只模拟一个 goroutine，一侧阻塞后不能继续执行下一次操作。</p><a href="https://github.com/hwj123hwj/go-learning-for-java-dev/blob/main/06-concurrency/03_channel/main.go">对照 03_channel/main.go ↗</a></details>
+      </div>
+      <div id="gateway-panel" role="tabpanel" aria-labelledby="tab-gateway" hidden>
+        <div class="lab-toolbar"><label>上游 A 的行为 <select id="scenario"><option value="success">正常流式响应</option><option value="fallback">返回 503，切换 B</option><option value="invalid">返回 400，停止请求</option><option value="partial">输出后发生读错误</option><option value="cancel">客户端在流中取消</option></select></label><span>每一步对应一次链路状态变化</span></div>
+        <div class="gateway-stage"><div class="route-node" data-node="client"><small>请求入口</small><h3>客户端</h3><span>POST /chat/completions</span></div><span class="route-arrow" aria-hidden="true">→</span><div class="route-node" data-node="proxy"><small>Chain.Stream</small><h3>Go 代理</h3><span>校验 · 转发 · Flush</span></div><span class="route-arrow" aria-hidden="true">→</span><div class="upstreams"><div class="route-node" data-node="a"><h3>上游 A</h3><span>首选</span></div><div class="route-node" data-node="b"><h3>上游 B</h3><span>备用</span></div></div></div>
+        <div class="playback"><button id="play" class="button primary" type="button">播放过程</button><button id="step" class="button" type="button">下一步</button><button id="gateway-reset" class="text-button" type="button">重置</button><span id="step-count">0 / 0</span></div>
+        <p id="gateway-message" class="lab-message" role="status">选择场景后播放，或逐步查看。</p>
+        <div class="stream-output"><div><h3>客户端收到的内容</h3><p id="stream-text">等待请求…</p><span id="stream-state">尚未发送</span></div><div><h3>事件轨迹</h3><ol id="trace"><li>点击“播放过程”开始。</li></ol></div></div>
+        <details class="explanation"><summary>动画与本仓库的实现有什么对应关系？</summary><p>这里演示流式路径：A 返回可切换的错误（例如 503）时直接尝试 B，不在 A 上重试。400 是不可重试错误。进入流读取后产生的读错误会原样返回，不再 fallback；客户端取消会结束请求。非流式路径才会按 ATTEMPTS 在同一上游重试。本动画的“断流”特指读取返回错误，并不等同于所有提前 EOF 场景。</p><a href="https://github.com/hwj123hwj/go-learning-for-java-dev/blob/main/09-streaming-proxy/internal/provider/chain.go">对照 provider/chain.go ↗</a></details>
+      </div>
+    </section>
+    <section class="practice" aria-labelledby="practice-title"><div><h2 id="practice-title">回到终端，把它写出来。</h2><p id="practice-description">动画帮助建立直觉，真正掌握要靠运行、修改和重写。</p><a id="solution-link" href="https://github.com/hwj123hwj/go-learning-for-java-dev/blob/main/06-concurrency/SOLUTIONS.md">完成练习后再看答案 ↗</a></div><div class="command-panel"><div><span>从仓库根目录运行</span><button id="copy-command" type="button" class="text-button">复制命令</button></div><pre><code id="lesson-command"></code></pre><p id="copy-status" role="status"></p></div></section>
+    <footer>Java → Go · 跑 → 练 → 对答案 → 重写 <a href="https://github.com/hwj123hwj/go-learning-for-java-dev/blob/main/JOURNEY.md">阅读学习轨迹 ↗</a></footer>
+  </main>
+</div>
+<noscript>交互实验需要 JavaScript。<a href="https://github.com/hwj123hwj/go-learning-for-java-dev">打开完整课程与源码</a>。</noscript>
+</body></html>

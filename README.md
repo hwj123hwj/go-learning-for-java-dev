@@ -2,6 +2,19 @@
 
 带路线图、练习题和实战项目的 Go 后端学习仓库。目标不是"看懂"，而是**吃透并能徒手写出来**——每个模块都按「跑 → 练 → 对答案 → 重写」的循环使用。
 
+## 交互学习页
+
+**在线体验：[Java → Go 交互学习实验室](https://hwj123hwj.github.io/go-learning-for-java-dev/)**
+
+用网页先观察，再回到源码练习：九阶段课程导航、Channel 发送/接收实验、SSE 与 fallback 逐步动画，以及当前浏览器的学习进度。
+
+```bash
+# 从仓库根目录启动，无需安装前端依赖
+python3 -m http.server 4174 --bind 127.0.0.1 --directory web
+```
+
+打开 <http://127.0.0.1:4174/>。动画是浏览器教学模拟，不执行 Go，也不调用真实模型。课程与练习链接指向本仓库 GitHub 源码。部署方法与验证命令见 [web/README.md](./web/README.md)。
+
 ## 这个仓库怎么用
 
 1. **跑**：进入模块目录 `go run ./xx_demo`，对照输出理解每一行在干什么
@@ -60,15 +73,16 @@
 ```bash
 # 单模块运行（每个目录都是独立 Go module）
 cd 06-concurrency && go run ./01_goroutine
-cd 09-streaming-proxy && go run ./cmd/proxy
+cd 09-streaming-proxy && UPSTREAMS="A=http://localhost:9090/v1,B=http://localhost:9091/v1" go run ./cmd/proxy
 
 # 单模块测试
 cd 08-engineering/02-project-layout && go test ./... -v
 
 # 结业实战三终端演示（SSE 流式 + fallback）
+# 每个终端先从仓库根目录执行：cd 09-streaming-proxy
 go run ./cmd/mock-upstream --addr :9090 --label 上游A     # 终端1
 go run ./cmd/mock-upstream --addr :9091 --label 上游B     # 终端2
-go run ./cmd/proxy                                         # 终端3
+UPSTREAMS="A=http://localhost:9090/v1,B=http://localhost:9091/v1" go run ./cmd/proxy  # 终端3
 curl -N -X POST localhost:8080/v1/chat/completions \
   -H 'Content-Type: application/json' \
   -d '{"model":"demo","messages":[{"role":"user","content":"你好"}],"stream":true}'
