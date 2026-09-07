@@ -28,7 +28,7 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir _site
-          cp web/index.html web/styles.css web/favicon.svg web/app.mjs web/models.mjs web/courses.mjs _site/
+          cp web/index.html web/styles.css web/favicon.svg web/app.mjs web/models.mjs web/courses.mjs web/course-labs.mjs web/course-player.mjs _site/
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

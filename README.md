@@ -6,7 +6,7 @@
 
 **在线体验：[Java → Go 交互学习实验室](https://hwj123hwj.github.io/go-learning-for-java-dev/)**
 
-用网页先观察，再回到源码练习：九阶段课程导航、Channel 发送/接收实验、SSE 与 fallback 逐步动画，以及当前浏览器的学习进度。
+用网页先观察，再回到源码练习：九阶段课程各有对应实验，覆盖函数、API 分层、JWT、gRPC、微服务、Channel、限流、错误链和 SSE；支持场景切换与当前浏览器的学习进度。
 
 ```bash
 # 从仓库根目录启动，无需安装前端依赖

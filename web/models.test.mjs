@@ -46,3 +46,62 @@ test('course content links resolve to actual repository files', () => {
     assert.ok(existsSync(new URL(`../${path}`,import.meta.url)),`missing course target ${path}`);
   }
 });
+
+import { courseLabs, labForCourse } from './course-labs.mjs';
+test('every course has its own lab and every scenario has valid frames and source', () => {
+  assert.equal(new Set(courses.map(c => labForCourse(c.id).title)).size, 9);
+  assert.equal(labForCourse('06').panel, 'channel');
+  assert.equal(labForCourse('09').panel, 'gateway');
+  for (const [id, lab] of Object.entries(courseLabs)) {
+    assert.equal(labForCourse(id).panel, 'course');
+    assert.ok(existsSync(new URL(`../${lab.source}`, import.meta.url)));
+    for (const option of lab.options) {
+      const frames = lab.steps(option.id);
+      assert.ok(frames.length > 1);
+      for (const frame of frames) {
+        assert.ok(frame.node >= 0 && frame.node < lab.nodes.length);
+        assert.ok(frame.message && frame.code && Object.keys(frame.values).length);
+      }
+    }
+  }
+});
+const last = (id, option) => courseLabs[id].steps(option).at(-1).values;
+test('division errors and integer results remain distinct', () => {
+  assert.equal(last('01','zero').result, 0);
+  assert.notEqual(last('01','zero').err, 'nil');
+  assert.equal(last('01','integer').result, 3);
+});
+test('invalid API IDs and failed authentication stop before business work', () => {
+  assert.equal(last('02','invalid').HTTP, 400);
+  assert.equal(last('02','invalid')['数据库查询次数'], 0);
+  assert.ok(courseLabs['02'].steps('invalid').every(f => f.node !== 2 && f.node !== 3));
+  assert.equal(last('02','missing').HTTP, 404);
+  assert.equal(last('02','found').HTTP, 200);
+  for(const option of ['missing','malformed','expired']) {
+    assert.equal(last('03',option).HTTP, 401);
+    assert.ok(courseLabs['03'].steps(option).every(f => f.node !== 3));
+  }
+  assert.equal(last('03','valid')['业务处理'], '放行');
+});
+test('RPC message counts distinguish all four modes', () => {
+  for(const [option, sent, received] of [['unary',1,1],['server',1,3],['client',2,1],['bidi',3,3]]) {
+    assert.equal(last('04',option)['客户端消息数'], sent);
+    assert.equal(last('04',option)['服务端消息数'], received);
+  }
+});
+test('downstream creation errors never write orders; reads can degrade', () => {
+  for(const option of ['missing','cancel']) assert.equal(last('05',option)['订单写入次数'], 0);
+  assert.equal(last('05','degrade').user_name, 'unknown');
+});
+test('token bucket enforces burst capacity and replenishes with virtual time', () => {
+  for(const [option, pass, reject] of [['burst',3,3],['paced',6,0],['fast',4,2]]) {
+    assert.equal(last('07',option)['通过'], pass);
+    assert.equal(last('07',option)['拒绝'], reject);
+    for(const frame of courseLabs['07'].steps(option)) assert.ok(frame.values['令牌'] >= 0 && frame.values['令牌'] <= 3);
+  }
+});
+test('error wrapping preserves identity while string formatting loses it', () => {
+  assert.equal(last('08','wrap')['匹配'], true);
+  assert.equal(last('08','string')['匹配'], false);
+  assert.equal(last('08','typed')['ve.Field'], 'age');
+});

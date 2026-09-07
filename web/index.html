@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Java → Go · 交互学习实验室</title>
-  <meta name="description" content="面向 Java 开发者的 Go 交互学习实验室。九阶段课程、Channel 动态实验、SSE 与 fallback 逐步演示，连接真实源码与练习。">
+  <meta name="description" content="面向 Java 开发者的 Go 交互学习实验室。九阶段课程各有对应实验：函数、API、JWT、gRPC、微服务、Channel、限流、错误链、SSE，连接真实源码与练习。">
   <link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css">
   <script type="module" src="app.mjs"></script>
 </head>
 <body>
 <a class="skip" href="#lesson">跳到课程内容</a>
-<header class="header"><a class="brand" href="#course-06"><span class="brand-symbol">Go</span><span>Java → Go <small>交互学习实验室</small></span></a><nav aria-label="主导航"><a href="#labs">概念实验</a><a href="https://github.com/hwj123hwj/go-learning-for-java-dev">GitHub ↗</a></nav></header>
+<header class="header"><a class="brand" href="#course-01"><span class="brand-symbol">Go</span><span>Java → Go <small>交互学习实验室</small></span></a><nav aria-label="主导航"><a href="#labs">概念实验</a><a href="https://github.com/hwj123hwj/go-learning-for-java-dev">GitHub ↗</a></nav></header>
 <div class="workspace">
   <aside class="curriculum" aria-label="课程路线">
     <div class="sidebar-heading"><h2>学习路线</h2><span>从语法到实战</span></div>
@@ -19,19 +19,24 @@
   </aside>
   <main id="lesson">
     <section class="lesson-intro" aria-labelledby="lesson-title">
-      <div class="lesson-topline"><span id="lesson-stage">阶段 06 · 并发编程</span><span class="reading-tag">读源码之前，先观察</span></div>
-      <h1 id="lesson-title">看见并发，理解协作。</h1>
-      <p id="lesson-description" class="lead">调整 Channel 容量，试着发送与接收。观察数据何时移动、goroutine 为什么等待。</p>
-      <div class="lesson-actions"><a id="lesson-source" class="button primary" href="https://github.com/hwj123hwj/go-learning-for-java-dev/tree/main/06-concurrency">打开课程源码 ↗</a><a id="lesson-exercises" class="button" href="https://github.com/hwj123hwj/go-learning-for-java-dev/blob/main/06-concurrency/EXERCISES.md">进入练习 ↗</a><label class="completion"><input id="lesson-complete" type="checkbox">我已完成这一阶段</label></div>
+      <div class="lesson-topline"><span id="lesson-stage">阶段 01 · 基础语法</span><span class="reading-tag">读源码之前，先观察</span></div>
+      <h1 id="lesson-title">从熟悉的 Java，走进 Go。</h1>
+      <p id="lesson-description" class="lead">变量、函数、结构体和接口。用七个可独立运行的脚本，建立 Go 的第一层直觉。</p>
+      <div class="lesson-actions"><a id="lesson-source" class="button primary" href="https://github.com/hwj123hwj/go-learning-for-java-dev/tree/main/01-quickstart">打开课程源码 ↗</a><a id="lesson-exercises" class="button" href="https://github.com/hwj123hwj/go-learning-for-java-dev/blob/main/01-quickstart/README.md">进入练习 ↗</a><label class="completion"><input id="lesson-complete" type="checkbox">我已完成这一阶段</label></div>
     </section>
     <section class="lesson-notes" aria-label="本课学习要点"><div><h2>从 Java 经验出发</h2><p id="java-bridge"></p></div><div><h2>这一步练到什么程度</h2><p id="lesson-goal"></p></div></section>
     <section id="labs" class="labs" aria-labelledby="labs-title">
       <div class="section-title"><h2 id="labs-title">动手改变，观察结果</h2><span>浏览器教学模拟 · 不执行 Go</span></div>
-      <div class="lab-tabs" role="tablist" aria-label="概念实验">
-        <button id="tab-channel" role="tab" aria-selected="true" aria-controls="channel-panel" tabindex="0" data-lab="channel">Channel 的发送与接收</button>
-        <button id="tab-gateway" role="tab" aria-selected="false" aria-controls="gateway-panel" tabindex="-1" data-lab="gateway">SSE 与上游切换</button>
+      <h3 id="lab-title" class="course-lab-title">本课实验</h3>
+      <div id="course-panel" aria-labelledby="lab-title" hidden>
+        <div class="lab-toolbar"><label>实验场景 <select class="course-scenario"></select></label><span>每步展示本课的状态变化</span></div>
+        <div class="course-diagram" aria-label="执行过程"></div>
+        <div class="playback"><button type="button" class="button primary" data-action="play">播放过程</button><button type="button" class="button" data-action="previous">上一步</button><button type="button" class="button" data-action="next">下一步</button><button type="button" class="text-button" data-action="reset">重置</button><span class="course-frame-count"></span></div>
+        <p class="course-frame-message lab-message" role="status"></p>
+        <div class="course-details"><div><h3>当前代码 / 协议</h3><pre><code class="course-frame-code"></code></pre></div><div><h3>变量与输出</h3><dl class="course-values"></dl></div></div>
+        <details class="explanation"><summary>查看完整轨迹与源码说明</summary><ol class="course-trace"></ol><p class="course-lab-note"></p><a class="course-lab-source">对照课程源码 ↗</a></details>
       </div>
-      <div id="channel-panel" role="tabpanel" aria-labelledby="tab-channel">
+      <div id="channel-panel" aria-labelledby="lab-title" hidden>
         <div class="lab-toolbar"><label>Channel 容量 <select id="capacity"><option value="0">0 · 无缓冲</option><option value="2" selected>2 · 有缓冲</option><option value="4">4 · 有缓冲</option></select></label><span id="channel-kind">缓冲区可容纳 2 个值</span><button id="channel-reset" class="text-button" type="button">重置实验</button></div>
         <div class="channel-stage" aria-label="发送者、Channel 和接收者状态">
           <div class="actor"><span class="actor-type">goroutine A</span><h3>发送者</h3><div id="sender-value" class="actor-value">准备发送 1</div><span id="sender-state" class="state">就绪</span><button id="send" type="button" class="button">发送一个值 →</button></div>
@@ -42,7 +47,7 @@
         <div class="lab-footer"><button id="channel-close" type="button" class="text-button">关闭 Channel</button><span id="close-note">由发送方关闭；关闭后可以继续读完缓冲值。</span></div>
         <details class="explanation"><summary>为什么这和 Java 的队列不完全一样？</summary><p>有缓冲 Channel 可以类比有界 BlockingQueue，但容量为 0 时，发送与接收必须配对；它更接近一次交接。Channel 也有关闭语义：缓冲读完后返回零值与 ok=false。这个实验每侧只模拟一个 goroutine，一侧阻塞后不能继续执行下一次操作。</p><a href="https://github.com/hwj123hwj/go-learning-for-java-dev/blob/main/06-concurrency/03_channel/main.go">对照 03_channel/main.go ↗</a></details>
       </div>
-      <div id="gateway-panel" role="tabpanel" aria-labelledby="tab-gateway" hidden>
+      <div id="gateway-panel" aria-labelledby="lab-title" hidden>
         <div class="lab-toolbar"><label>上游 A 的行为 <select id="scenario"><option value="success">正常流式响应</option><option value="fallback">返回 503，切换 B</option><option value="invalid">返回 400，停止请求</option><option value="partial">输出后发生读错误</option><option value="cancel">客户端在流中取消</option></select></label><span>每一步对应一次链路状态变化</span></div>
         <div class="gateway-stage"><div class="route-node" data-node="client"><small>请求入口</small><h3>客户端</h3><span>POST /chat/completions</span></div><span class="route-arrow" aria-hidden="true">→</span><div class="route-node" data-node="proxy"><small>Chain.Stream</small><h3>Go 代理</h3><span>校验 · 转发 · Flush</span></div><span class="route-arrow" aria-hidden="true">→</span><div class="upstreams"><div class="route-node" data-node="a"><h3>上游 A</h3><span>首选</span></div><div class="route-node" data-node="b"><h3>上游 B</h3><span>备用</span></div></div></div>
         <div class="playback"><button id="play" class="button primary" type="button">播放过程</button><button id="step" class="button" type="button">下一步</button><button id="gateway-reset" class="text-button" type="button">重置</button><span id="step-count">0 / 0</span></div>

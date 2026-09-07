@@ -1,3 +1,5 @@
+import { labForCourse } from './course-labs.mjs';
+import { createCoursePlayer } from './course-player.mjs';
 import { channelState, channelAction, gatewaySteps } from './models.mjs';
 import { courses, repository } from './courses.mjs';
 const $ = (selector) => document.querySelector(selector);
@@ -10,7 +12,9 @@ try {
   const saved = JSON.parse(localStorage.getItem('java-go-progress-v1') || '[]');
   if (Array.isArray(saved)) completed = new Set(saved.filter((id) => courses.some((course) => course.id === id)));
 } catch { $('#storage-note').textContent = '浏览器存储不可用或数据异常，当前进度仍可在本页使用。'; }
-let active = '06';
+let active = '01';
+const coursePlayer = createCoursePlayer($('#course-panel'), repository);
+let initialized = false;
 function renderProgress() {
   $('#progress-count').textContent = `${completed.size} / ${courses.length}`;
   $('#course-progress').value = completed.size;
@@ -35,8 +39,9 @@ courses.forEach((course) => {
 });
 function selectCourse() {
   const id = location.hash.match(/^#course-(\d{2})$/)?.[1];
-  if (!id && location.hash) return;
-  const course = courses.find((c) => c.id === id) || courses[5]; active = course.id;
+  if (!id && location.hash && initialized) return;
+  const course = courses.find((c) => c.id === id) || courses[0]; active = course.id;
+  initialized = true;
   $('#lesson-stage').textContent = `阶段 ${course.id} · ${course.name}`;
   $('#lesson-title').textContent = course.title; $('#lesson-description').textContent = course.description;
   $('#java-bridge').textContent = course.bridge; $('#lesson-goal').textContent = course.goal;
@@ -46,7 +51,7 @@ function selectCourse() {
   $('#lesson-exercises').textContent = course.exercise?.includes('EXERCISES') ? '进入练习 ↗' : course.exercise ? '阅读学习说明 ↗' : '查看服务代码 ↗';
   $('#solution-link').hidden = !course.solution;
   if (course.solution) $('#solution-link').href = `${repository}/blob/main/${course.solution}`;
-  if (active === '09') setLab('gateway'); else if (active === '06') setLab('channel');
+  showCourseLab(active);
   document.title = `${course.name} · Java → Go 交互学习实验室`;
   renderProgress();
   revealActiveCourse();
@@ -122,23 +127,15 @@ $('#play').addEventListener('click', () => {
   advance(); if (frame === frames.length - 1) return;
   $('#play').textContent = '暂停'; timer = setInterval(advance, 1200);
 });
-function setLab(lab) {
-  pause();
-  document.querySelectorAll('[data-lab]').forEach((tab) => {
-    const selected = tab.dataset.lab === lab;
-    tab.setAttribute('aria-selected', String(selected)); tab.tabIndex = selected ? 0 : -1;
-    $(`#${tab.dataset.lab}-panel`).hidden = !selected;
-  });
+function showCourseLab(id) {
+  pause(); coursePlayer.stop();
+  const selection = labForCourse(id);
+  $('#lab-title').textContent = selection.title;
+  for (const name of ['channel', 'gateway', 'course']) $(`#${name}-panel`).hidden = name !== selection.panel;
+  if (selection.panel === 'course') coursePlayer.show(selection.lab);
+  else if (selection.panel === 'channel') resetChannel();
+  else resetGateway();
 }
-const tabs = [...document.querySelectorAll('[data-lab]')];
-tabs.forEach((tab, index) => {
-  tab.addEventListener('click', () => setLab(tab.dataset.lab));
-  tab.addEventListener('keydown', (event) => {
-    if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
-    event.preventDefault(); const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
-    setLab(tabs[next].dataset.lab); tabs[next].focus();
-  });
-});
-document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
-window.addEventListener('pagehide', pause); window.addEventListener('hashchange', selectCourse);
+document.addEventListener('visibilitychange', () => { if (document.hidden) { pause(); coursePlayer.stop(); } });
+window.addEventListener('pagehide', () => { pause(); coursePlayer.stop(); }); window.addEventListener('hashchange', selectCourse);
 renderChannel(); renderGateway(); selectCourse();
