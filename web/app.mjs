@@ -138,4 +138,14 @@ function showCourseLab(id) {
 }
 document.addEventListener('visibilitychange', () => { if (document.hidden) { pause(); coursePlayer.stop(); } });
 window.addEventListener('pagehide', () => { pause(); coursePlayer.stop(); }); window.addEventListener('hashchange', selectCourse);
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+  if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+  if (event.target instanceof Element && event.target.closest('input, select, textarea, [contenteditable]')) return;
+  const panel = document.querySelector('#course-panel:not([hidden]), #gateway-panel:not([hidden])');
+  if (!panel) return;
+  const next = event.key === 'ArrowRight';
+  const button = panel.id === 'course-panel' ? panel.querySelector(`[data-action="${next ? 'next' : 'previous'}"]`) : next ? panel.querySelector('#step') : null;
+  if (button && !button.disabled) { event.preventDefault(); button.click(); }
+});
 renderChannel(); renderGateway(); selectCourse();

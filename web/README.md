@@ -40,3 +40,34 @@ node --check web/app.mjs
 GitHub Pages 由 `.github/workflows/pages.yml` 部署：推送 main 后先运行模型与课程链接测试，再上传站点资源到 Pages。PR 只验证，不部署。
 
 在线地址：<https://hwj123hwj.github.io/go-learning-for-java-dev/>。
+
+## 自托管（nginx）
+
+资源均为相对路径，任意静态服务器可用。以 nginx 为例：
+
+```nginx
+server {
+    listen 8080;
+    root /var/www/go-learning;
+    index index.html;
+    charset utf-8;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+
+    error_page 404 /404.html;
+}
+```
+
+再在 `/etc/nginx/mime.types` 里补两个扩展名（默认不含，缺失时 `.mjs` 会以 `application/octet-stream` 下发，浏览器拒绝执行 ES module 导致白屏）：
+
+```nginx
+application/javascript    js mjs;
+application/manifest+json webmanifest;
+```
+
+上传 `web/` 目录内容到 root 后 `nginx -t && systemctl reload nginx` 即可。两个坑：扩展名映射要加在全局 `mime.types`，**不要**在 `server` 块里写 `types { … }`——那会整体覆盖继承的映射，让 html/css 全部变成 octet-stream，首页会被浏览器当附件下载；云服务器还需在安全组放行对应端口。
+
+## 自动部署
+
+`.github/workflows/deploy-server.yml` 在 `web/` 变更合入 main 后自动部署到自建服务器：先跑模型与链接测试，再 rsync 到 nginx 站点根目录，最后对首页和资源做可访问性冒烟检查。需要在仓库 Secrets 里配置 `DEPLOY_HOST`、`DEPLOY_USER`、`SSH_PRIVATE_KEY`，对应服务器 `authorized_keys` 中一条带 `restrict` 前缀的部署公钥。GitHub Pages 仍由 `pages.yml` 独立部署。

@@ -4,7 +4,14 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Java → Go · 交互学习实验室</title>
   <meta name="description" content="面向 Java 开发者的 Go 交互学习实验室。九阶段课程各有对应实验：函数、API、JWT、gRPC、微服务、Channel、限流、错误链、SSE，连接真实源码与练习。">
-  <link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css">
+  <link rel="canonical" href="https://hwj123hwj.github.io/go-learning-for-java-dev/">
+  <meta name="theme-color" content="#97502e">
+  <meta property="og:title" content="Java → Go · 交互学习实验室">
+  <meta property="og:description" content="面向 Java 开发者的 Go 交互学习实验室。九阶段课程各有对应实验：函数、API、JWT、gRPC、微服务、Channel、限流、错误链、SSE。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hwj123hwj.github.io/go-learning-for-java-dev/">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="styles.css">
   <script type="module" src="app.mjs"></script>
 </head>
 <body>
@@ -29,7 +36,7 @@
       <div class="section-title"><h2 id="labs-title">动手改变，观察结果</h2><span>浏览器教学模拟 · 不执行 Go</span></div>
       <h3 id="lab-title" class="course-lab-title">本课实验</h3>
       <div id="course-panel" aria-labelledby="lab-title" hidden>
-        <div class="lab-toolbar"><label>实验场景 <select class="course-scenario"></select></label><span>每步展示本课的状态变化</span></div>
+        <div class="lab-toolbar"><label>实验场景 <select class="course-scenario"></select></label><span>每步展示本课的状态变化 · 可用 ← → 单步</span></div>
         <div class="course-diagram" aria-label="执行过程"></div>
         <div class="playback"><button type="button" class="button primary" data-action="play">播放过程</button><button type="button" class="button" data-action="previous">上一步</button><button type="button" class="button" data-action="next">下一步</button><button type="button" class="text-button" data-action="reset">重置</button><span class="course-frame-count"></span></div>
         <p class="course-frame-message lab-message" role="status"></p>
@@ -48,7 +55,7 @@
         <details class="explanation"><summary>为什么这和 Java 的队列不完全一样？</summary><p>有缓冲 Channel 可以类比有界 BlockingQueue，但容量为 0 时，发送与接收必须配对；它更接近一次交接。Channel 也有关闭语义：缓冲读完后返回零值与 ok=false。这个实验每侧只模拟一个 goroutine，一侧阻塞后不能继续执行下一次操作。</p><a href="https://github.com/hwj123hwj/go-learning-for-java-dev/blob/main/06-concurrency/03_channel/main.go">对照 03_channel/main.go ↗</a></details>
       </div>
       <div id="gateway-panel" aria-labelledby="lab-title" hidden>
-        <div class="lab-toolbar"><label>上游 A 的行为 <select id="scenario"><option value="success">正常流式响应</option><option value="fallback">返回 503，切换 B</option><option value="invalid">返回 400，停止请求</option><option value="partial">输出后发生读错误</option><option value="cancel">客户端在流中取消</option></select></label><span>每一步对应一次链路状态变化</span></div>
+        <div class="lab-toolbar"><label>上游 A 的行为 <select id="scenario"><option value="success">正常流式响应</option><option value="fallback">返回 503，切换 B</option><option value="invalid">返回 400，停止请求</option><option value="partial">输出后发生读错误</option><option value="cancel">客户端在流中取消</option></select></label><span>每一步对应一次链路状态变化 · → 单步</span></div>
         <div class="gateway-stage"><div class="route-node" data-node="client"><small>请求入口</small><h3>客户端</h3><span>POST /chat/completions</span></div><span class="route-arrow" aria-hidden="true">→</span><div class="route-node" data-node="proxy"><small>Chain.Stream</small><h3>Go 代理</h3><span>校验 · 转发 · Flush</span></div><span class="route-arrow" aria-hidden="true">→</span><div class="upstreams"><div class="route-node" data-node="a"><h3>上游 A</h3><span>首选</span></div><div class="route-node" data-node="b"><h3>上游 B</h3><span>备用</span></div></div></div>
         <div class="playback"><button id="play" class="button primary" type="button">播放过程</button><button id="step" class="button" type="button">下一步</button><button id="gateway-reset" class="text-button" type="button">重置</button><span id="step-count">0 / 0</span></div>
         <p id="gateway-message" class="lab-message" role="status">选择场景后播放，或逐步查看。</p>

@@ -1,0 +1,12 @@
+{
+  "name": "Java → Go · 交互学习实验室",
+  "short_name": "Java→Go",
+  "description": "面向 Java 开发者的 Go 交互学习实验室，九阶段课程各有对应实验。",
+  "lang": "zh-CN",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#97502e",
+  "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
