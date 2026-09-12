@@ -1,0 +1,49 @@
+name: Deploy web to server
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - '.github/workflows/deploy-server.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-server
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run web tests
+        run: |
+          node --test web/models.test.mjs
+          node --check web/app.mjs
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Rsync site to server
+        run: |
+          rsync -az --delete --exclude '.DS_Store' \
+            web/ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/var/www/go-learning/"
+
+      - name: Smoke check
+        run: |
+          sleep 2
+          body=$(curl -fsS --max-time 20 "http://${{ secrets.DEPLOY_HOST }}:8080/")
+          echo "$body" | grep -q "Java → Go"
+          curl -fsS -o /dev/null --max-time 20 "http://${{ secrets.DEPLOY_HOST }}:8080/app.mjs"
+          curl -fsS -o /dev/null --max-time 20 "http://${{ secrets.DEPLOY_HOST }}:8080/styles.css"
+          echo "Site is live."
