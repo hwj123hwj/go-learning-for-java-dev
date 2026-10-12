@@ -31,7 +31,7 @@ python3 -m http.server 4174 --bind 127.0.0.1 --directory web
 | 阶段 | 目录 | 内容 | 练习 |
 |---|---|---|---|
 | 01 | [01-quickstart](./01-quickstart/) | 基础语法 7 讲（变量/函数/结构体/接口/并发/集合） | — |
-| 02 | [02-user-api](./02-user-api/) | Gin + GORM 入门：CRUD、分层架构、PostgreSQL | — |
+| 02 | [03-user-api-advanced](./03-user-api-advanced/) | Gin + GORM 入门：CRUD、分层架构、PostgreSQL（基础版已合并入进阶版项目，02 与 03 阶段共用该目录） | — |
 | 03 | [03-user-api-advanced](./03-user-api-advanced/) | 进阶：JWT 认证、中间件、viper 配置、Service 层单测、Docker 部署 | — |
 | 04 | [04-grpc-demo](./04-grpc-demo/) | gRPC 基础：proto、四种模式、拦截器、错误处理 | — |
 | 05 | [05-grpc-microservice](./05-grpc-microservice/) | gRPC 微服务：多服务互通、服务间调用 | — |
