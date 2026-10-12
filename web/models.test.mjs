@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { channelState, channelAction, gatewaySteps } from './models.mjs';
 import { courses } from './courses.mjs';
 const act = (s, ...actions) => actions.reduce(channelAction, s);
@@ -45,6 +45,13 @@ test('course content links resolve to actual repository files', () => {
   for (const course of courses) for(const path of [course.directory, course.exercise, course.solution].filter(Boolean)) {
     assert.ok(existsSync(new URL(`../${path}`,import.meta.url)),`missing course target ${path}`);
   }
+});
+test('share image and PWA icons exist and are wired up', () => {
+  const manifest = JSON.parse(readFileSync(new URL('./manifest.webmanifest', import.meta.url), 'utf8'));
+  const html = readFileSync(new URL('./index.html', import.meta.url), 'utf8');
+  for (const icon of manifest.icons) assert.ok(existsSync(new URL(`./${icon.src}`, import.meta.url)), `missing icon ${icon.src}`);
+  assert.ok(existsSync(new URL('./og-card.png', import.meta.url)), 'missing og-card.png');
+  assert.ok(html.includes('og-card.png')); assert.ok(html.includes('icon-192.png'));
 });
 
 import { courseLabs, labForCourse } from './course-labs.mjs';

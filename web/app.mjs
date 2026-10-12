@@ -17,7 +17,7 @@ const coursePlayer = createCoursePlayer($('#course-panel'), repository);
 let initialized = false;
 function renderProgress() {
   $('#progress-count').textContent = `${completed.size} / ${courses.length}`;
-  $('#course-progress').value = completed.size;
+  const bar = $('#course-progress'); bar.max = courses.length; bar.value = completed.size;
   courses.forEach((course) => {
     const item = $(`[data-course="${course.id}"]`);
     item.setAttribute('aria-current', course.id === active ? 'step' : 'false');
@@ -51,6 +51,11 @@ function selectCourse() {
   $('#lesson-exercises').textContent = course.exercise?.includes('EXERCISES') ? '进入练习 ↗' : course.exercise ? '阅读学习说明 ↗' : '查看服务代码 ↗';
   $('#solution-link').hidden = !course.solution;
   if (course.solution) $('#solution-link').href = `${repository}/blob/main/${course.solution}`;
+  const next = courses[courses.findIndex((c) => c.id === course.id) + 1];
+  const nextLink = $('#lesson-next');
+  nextLink.hidden = false;
+  if (next) { nextLink.href = `#course-${next.id}`; nextLink.textContent = `下一阶段：${next.name} →`; }
+  else { nextLink.href = `${repository}/tree/main/interview-prep`; nextLink.textContent = '下一站：面试准备支线 ↗'; }
   showCourseLab(active);
   document.title = `${course.name} · Java → Go 交互学习实验室`;
   renderProgress();
@@ -113,6 +118,7 @@ function renderGateway() {
   $('#stream-state').textContent = current?.state || '尚未发送';
   $('#step-count').textContent = `${frame + 1} / ${frames.length}`;
   $('#step').disabled = frame === frames.length - 1;
+  $('#step-back').disabled = frame < 0;
   $('#trace').replaceChildren();
   if (frame < 0) $('#trace').append(make('li', null, '点击“播放过程”开始。'));
   else frames.slice(0, frame + 1).forEach((s) => $('#trace').append(make('li', null, s.event)));
@@ -121,6 +127,7 @@ function advance() { if (frame < frames.length - 1) frame++; renderGateway(); if
 function resetGateway() { pause(); frame = -1; frames = gatewaySteps($('#scenario').value); renderGateway(); $('#play').textContent = '播放过程'; }
 $('#scenario').addEventListener('change', resetGateway); $('#gateway-reset').addEventListener('click', resetGateway);
 $('#step').addEventListener('click', () => { pause(); advance(); });
+$('#step-back').addEventListener('click', () => { if (frame >= 0) { pause(); frame--; renderGateway(); } });
 $('#play').addEventListener('click', () => {
   if (timer !== null) { pause(); return; }
   if (frame === frames.length - 1) frame = -1;
@@ -145,7 +152,27 @@ document.addEventListener('keydown', (event) => {
   const panel = document.querySelector('#course-panel:not([hidden]), #gateway-panel:not([hidden])');
   if (!panel) return;
   const next = event.key === 'ArrowRight';
-  const button = panel.id === 'course-panel' ? panel.querySelector(`[data-action="${next ? 'next' : 'previous'}"]`) : next ? panel.querySelector('#step') : null;
+  const button = panel.id === 'course-panel'
+    ? panel.querySelector(`[data-action="${next ? 'next' : 'previous'}"]`)
+    : panel.querySelector(next ? '#step' : '#step-back');
   if (button && !button.disabled) { event.preventDefault(); button.click(); }
 });
 renderChannel(); renderGateway(); selectCourse();
+const themeMeta = document.querySelector('meta[name="theme-color"]');
+const THEME_COLORS = { light: '#97502e', dark: '#221d17' };
+const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+function effectiveTheme() { return (document.documentElement.dataset.theme || (systemDark.matches ? 'dark' : 'light')) === 'dark' ? 'dark' : 'light'; }
+function applyThemeMeta() {
+  const dark = effectiveTheme() === 'dark';
+  themeMeta?.setAttribute('content', dark ? THEME_COLORS.dark : THEME_COLORS.light);
+  const toggle = $('#theme-toggle');
+  if (toggle) { toggle.textContent = dark ? '浅色模式' : '深色模式'; toggle.setAttribute('aria-label', dark ? '切换到浅色模式' : '切换到深色模式'); }
+}
+$('#theme-toggle').addEventListener('click', () => {
+  const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem('java-go-theme-v1', next); } catch { /* 存储不可用时主题仅本次生效 */ }
+  applyThemeMeta();
+});
+systemDark.addEventListener('change', applyThemeMeta);
+applyThemeMeta();

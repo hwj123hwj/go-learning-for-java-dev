@@ -10,13 +10,18 @@
   <meta property="og:description" content="面向 Java 开发者的 Go 交互学习实验室。九阶段课程各有对应实验：函数、API、JWT、gRPC、微服务、Channel、限流、错误链、SSE。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://hwj123hwj.github.io/go-learning-for-java-dev/">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://hwj123hwj.github.io/go-learning-for-java-dev/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="styles.css">
+  <script>try{var t=localStorage.getItem('java-go-theme-v1');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t}catch(e){}</script>
   <script type="module" src="app.mjs"></script>
 </head>
 <body>
 <a class="skip" href="#lesson">跳到课程内容</a>
-<header class="header"><a class="brand" href="#course-01"><span class="brand-symbol">Go</span><span>Java → Go <small>交互学习实验室</small></span></a><nav aria-label="主导航"><a href="#labs">概念实验</a><a href="https://github.com/hwj123hwj/go-learning-for-java-dev">GitHub ↗</a></nav></header>
+<header class="header"><a class="brand" href="#course-01"><span class="brand-symbol">Go</span><span>Java → Go <small>交互学习实验室</small></span></a><nav aria-label="主导航"><a href="#labs">概念实验</a><button id="theme-toggle" type="button" class="theme-toggle">深色模式</button><a href="https://github.com/hwj123hwj/go-learning-for-java-dev">GitHub ↗</a></nav></header>
 <div class="workspace">
   <aside class="curriculum" aria-label="课程路线">
     <div class="sidebar-heading"><h2>学习路线</h2><span>从语法到实战</span></div>
@@ -29,7 +34,7 @@
       <div class="lesson-topline"><span id="lesson-stage">阶段 01 · 基础语法</span><span class="reading-tag">读源码之前，先观察</span></div>
       <h1 id="lesson-title">从熟悉的 Java，走进 Go。</h1>
       <p id="lesson-description" class="lead">变量、函数、结构体和接口。用七个可独立运行的脚本，建立 Go 的第一层直觉。</p>
-      <div class="lesson-actions"><a id="lesson-source" class="button primary" href="https://github.com/hwj123hwj/go-learning-for-java-dev/tree/main/01-quickstart">打开课程源码 ↗</a><a id="lesson-exercises" class="button" href="https://github.com/hwj123hwj/go-learning-for-java-dev/blob/main/01-quickstart/README.md">进入练习 ↗</a><label class="completion"><input id="lesson-complete" type="checkbox">我已完成这一阶段</label></div>
+      <div class="lesson-actions"><a id="lesson-source" class="button primary" href="https://github.com/hwj123hwj/go-learning-for-java-dev/tree/main/01-quickstart">打开课程源码 ↗</a><a id="lesson-exercises" class="button" href="https://github.com/hwj123hwj/go-learning-for-java-dev/blob/main/01-quickstart/README.md">进入练习 ↗</a><a id="lesson-next" class="button" hidden>下一阶段 →</a><label class="completion"><input id="lesson-complete" type="checkbox">我已完成这一阶段</label></div>
     </section>
     <section class="lesson-notes" aria-label="本课学习要点"><div><h2>从 Java 经验出发</h2><p id="java-bridge"></p></div><div><h2>这一步练到什么程度</h2><p id="lesson-goal"></p></div></section>
     <section id="labs" class="labs" aria-labelledby="labs-title">
@@ -55,9 +60,9 @@
         <details class="explanation"><summary>为什么这和 Java 的队列不完全一样？</summary><p>有缓冲 Channel 可以类比有界 BlockingQueue，但容量为 0 时，发送与接收必须配对；它更接近一次交接。Channel 也有关闭语义：缓冲读完后返回零值与 ok=false。这个实验每侧只模拟一个 goroutine，一侧阻塞后不能继续执行下一次操作。</p><a href="https://github.com/hwj123hwj/go-learning-for-java-dev/blob/main/06-concurrency/03_channel/main.go">对照 03_channel/main.go ↗</a></details>
       </div>
       <div id="gateway-panel" aria-labelledby="lab-title" hidden>
-        <div class="lab-toolbar"><label>上游 A 的行为 <select id="scenario"><option value="success">正常流式响应</option><option value="fallback">返回 503，切换 B</option><option value="invalid">返回 400，停止请求</option><option value="partial">输出后发生读错误</option><option value="cancel">客户端在流中取消</option></select></label><span>每一步对应一次链路状态变化 · → 单步</span></div>
+        <div class="lab-toolbar"><label>上游 A 的行为 <select id="scenario"><option value="success">正常流式响应</option><option value="fallback">返回 503，切换 B</option><option value="invalid">返回 400，停止请求</option><option value="partial">输出后发生读错误</option><option value="cancel">客户端在流中取消</option></select></label><span>每一步对应一次链路状态变化 · 可用 ← → 单步</span></div>
         <div class="gateway-stage"><div class="route-node" data-node="client"><small>请求入口</small><h3>客户端</h3><span>POST /chat/completions</span></div><span class="route-arrow" aria-hidden="true">→</span><div class="route-node" data-node="proxy"><small>Chain.Stream</small><h3>Go 代理</h3><span>校验 · 转发 · Flush</span></div><span class="route-arrow" aria-hidden="true">→</span><div class="upstreams"><div class="route-node" data-node="a"><h3>上游 A</h3><span>首选</span></div><div class="route-node" data-node="b"><h3>上游 B</h3><span>备用</span></div></div></div>
-        <div class="playback"><button id="play" class="button primary" type="button">播放过程</button><button id="step" class="button" type="button">下一步</button><button id="gateway-reset" class="text-button" type="button">重置</button><span id="step-count">0 / 0</span></div>
+        <div class="playback"><button id="play" class="button primary" type="button">播放过程</button><button id="step-back" class="button" type="button" disabled>上一步</button><button id="step" class="button" type="button">下一步</button><button id="gateway-reset" class="text-button" type="button">重置</button><span id="step-count">0 / 0</span></div>
         <p id="gateway-message" class="lab-message" role="status">选择场景后播放，或逐步查看。</p>
         <div class="stream-output"><div><h3>客户端收到的内容</h3><p id="stream-text">等待请求…</p><span id="stream-state">尚未发送</span></div><div><h3>事件轨迹</h3><ol id="trace"><li>点击“播放过程”开始。</li></ol></div></div>
         <details class="explanation"><summary>动画与本仓库的实现有什么对应关系？</summary><p>这里演示流式路径：A 返回可切换的错误（例如 503）时直接尝试 B，不在 A 上重试。400 是不可重试错误。进入流读取后产生的读错误会原样返回，不再 fallback；客户端取消会结束请求。非流式路径才会按 ATTEMPTS 在同一上游重试。本动画的“断流”特指读取返回错误，并不等同于所有提前 EOF 场景。</p><a href="https://github.com/hwj123hwj/go-learning-for-java-dev/blob/main/09-streaming-proxy/internal/provider/chain.go">对照 provider/chain.go ↗</a></details>
